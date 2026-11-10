@@ -1,0 +1,30 @@
+name: barge-in
+description: >
+  The caller interrupts the agent's replies at 500, 900 and 1500 ms after the reply starts.
+  Measures how quickly the agent stops talking and how much the two overlap.
+sample_rate: 8000
+turns:
+  - say: "Can you tell me about your opening hours and your holiday schedule"
+    duration_ms: 3000
+  - say: "Sorry, just the weekend hours please"
+    duration_ms: 1700
+    interrupt_after_ms: 500
+    pause_ms: 300
+  - say: "And is parking free on Sundays"
+    duration_ms: 1600
+    interrupt_after_ms: 900
+    pause_ms: 300
+  - say: "Okay, one last thing, do you take walk-ins"
+    duration_ms: 2000
+    interrupt_after_ms: 1500
+    pause_ms: 300
+agent:
+  endpointing_ms: 500
+  response_delay_ms: 300
+  response_ms: [5000]
+  barge_in: true
+  barge_in_min_speech_ms: 120
+  stop_latency_ms: 100
+assertions:
+  max_bargein_stop_p95_ms: 500
+  max_false_interruptions: 0

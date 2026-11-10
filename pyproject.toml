@@ -1,0 +1,66 @@
+[build-system]
+requires = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
+
+[project]
+name = "voice-eval-toolkit"
+version = "0.1.0"
+description = "Barge-in, turn-taking and simulated-caller load evaluation for voice agents."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+authors = [{ name = "Aqib Nawab", email = "aqibnawab1100@gmail.com" }]
+keywords = ["voice-ai", "evaluation", "barge-in", "turn-taking", "load-testing", "livekit", "sip"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Multimedia :: Sound/Audio :: Speech",
+    "Topic :: Software Development :: Testing",
+]
+dependencies = [
+    "numpy>=1.24",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+livekit = ["livekit>=1.0", "livekit-api>=1.0"]
+otel = [
+    "opentelemetry-sdk>=1.25",
+    "opentelemetry-exporter-otlp-proto-http>=1.25",
+]
+wer = ["jiwer>=3.0"]
+vad = ["webrtcvad-wheels>=2.0.10"]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.5",
+    "jiwer>=3.0",
+    "livekit-api>=1.0",
+    "opentelemetry-sdk>=1.25",
+    "opentelemetry-exporter-otlp-proto-http>=1.25",
+]
+
+[project.scripts]
+qsv = "qsv.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/qsv"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "C4"]
+ignore = ["B905"]

@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,vad]"
+      - name: Lint
+        run: ruff check .
+      - name: Test
+        run: pytest
+      - name: Smoke test the CLI
+        run: |
+          qsv validate examples/scenarios/*.yaml
+          qsv bargein --transport loopback --out smoke/bargein
+          qsv load --transport loopback --scenario examples/scenarios/basic.yaml --callers 5 --out smoke/load
+      - name: Upload sample reports
+        if: matrix.python-version == '3.12'
+        uses: actions/upload-artifact@v4
+        with:
+          name: sample-reports
+          path: smoke/

@@ -1,0 +1,28 @@
+name: telephony-wer
+description: >
+  Four short utterances with reference transcripts at 8 kHz. With the loopback mock agent the
+  transcripts are simulated (stt_word_error_rate), so this shows the WER plumbing. Against a real
+  agent that publishes caller transcripts (LiveKit Agents does), WER reflects its actual STT.
+sample_rate: 8000
+turns:
+  - say: "My account number is four seven one nine two"
+    duration_ms: 2600
+    expected_transcript: "my account number is four seven one nine two"
+  - say: "I was charged twice for the March invoice"
+    duration_ms: 2300
+    pause_ms: 300
+    expected_transcript: "i was charged twice for the march invoice"
+  - say: "Please send the refund to the original card"
+    duration_ms: 2300
+    pause_ms: 300
+    expected_transcript: "please send the refund to the original card"
+  - say: "Thank you that is all"
+    duration_ms: 1400
+    pause_ms: 300
+    expected_transcript: "thank you that is all"
+agent:
+  stt_word_error_rate: 0.12
+  jitter_ms: 120
+  response_ms: [1500]
+assertions:
+  max_wer: 0.35

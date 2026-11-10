@@ -1,0 +1,19 @@
+name: hesitation
+description: >
+  The caller pauses mid-sentence ("um...") for 900 ms. An agent whose endpointing is shorter
+  than the pause will start talking over the rest of the sentence, which counts as a false
+  interruption. The mock agent here is set up to do exactly that so the report shows it.
+sample_rate: 8000
+turns:
+  - say: "I want to change my flight to, um, the morning one on Tuesday"
+    duration_ms: 3200
+    hesitation:
+      at_ms: 1400
+      duration_ms: 900
+  - say: "Yes that one, thank you"
+    duration_ms: 1400
+    pause_ms: 300
+agent:
+  endpointing_ms: 300
+  response_delay_ms: 150
+  response_ms: [2000, 1500]

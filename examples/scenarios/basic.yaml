@@ -1,0 +1,25 @@
+name: basic
+description: >
+  A polite three-turn call. The caller waits for the agent to finish each reply.
+  Good for turn-gap percentiles and as a smoke test for load runs.
+sample_rate: 8000
+turns:
+  - say: "Hi, I'd like to book a table for four on Friday evening"
+    duration_ms: 2800
+    expected_transcript: "hi i'd like to book a table for four on friday evening"
+  - say: "Seven thirty would be great"
+    duration_ms: 1500
+    pause_ms: 300
+    expected_transcript: "seven thirty would be great"
+  - say: "No that's everything, thanks"
+    duration_ms: 1700
+    pause_ms: 300
+    expected_transcript: "no that's everything thanks"
+agent:
+  endpointing_ms: 500
+  response_delay_ms: 300
+  jitter_ms: 150
+  response_ms: [2200, 1800, 1500]
+assertions:
+  max_turn_gap_p95_ms: 1500
+  min_success_rate: 1.0
