@@ -9,7 +9,7 @@ The package is called `qsv` and ships one CLI with two tools:
 
 It is built by Aqib Nawab as part of the groundwork for QuickStart AI, an open-source voice agent infrastructure project that is still in development. Nothing here claims production traffic. The numbers in this README come from the bundled mock agent and a local LiveKit dev server, and they say so.
 
-[Landing page](https://voice-eval-toolkit.vercel.app) | [Docs](docs) | [Research notes](docs/research.md)
+[Landing page](https://voice-eval-toolkit.vercel.app) | [Docs](docs) | [Research notes](docs/research.md) | Related: [telephony-wer-bench](https://github.com/AQIB-NAWAB/telephony-wer-bench)
 
 ![Timeline of one loopback call. The caller interrupts the agent and the agent goes quiet 200 ms later.](docs/images/bargein-timeline.png)
 
@@ -211,9 +211,13 @@ scripts/            make_images.py regenerates docs/images
 - Telephony impairments on the caller audio: packet loss, jitter, band-limiting with mu-law, background noise and crosstalk.
 - Backchannel turns ("mm-hm") that should not make the agent stop, scored as false stops.
 - A semantic turn-detection comparison mode: VAD only, transcript triggered and model based, on the same scenarios.
-- Streaming-STT WER under the impairments above, against recorded 8 kHz audio.
+- Streaming-STT WER under telephony impairments. This now lives in its own project, [telephony-wer-bench](https://github.com/AQIB-NAWAB/telephony-wer-bench).
 - Baseline files and regression diffs between two reports.
 - A published results page for QuickStart AI once there is something real to measure, with method and limitations stated.
+
+## Related
+
+[telephony-wer-bench](https://github.com/AQIB-NAWAB/telephony-wer-bench) ([site](https://telephony-wer-bench.vercel.app)) is a sibling project by the same author. It measures streaming speech-to-text on 8 kHz phone audio: WER and CER, time to first partial, final latency and partial stability, under G.711, packet loss and noise. This toolkit tests how an agent behaves in a call. That one tests how well the speech-to-text stage hears the call.
 
 ## Development
 

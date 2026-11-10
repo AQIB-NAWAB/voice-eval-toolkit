@@ -19,6 +19,7 @@
     <nav>
       <a href="https://github.com/AQIB-NAWAB/voice-eval-toolkit">GitHub</a>
       <a href="https://github.com/AQIB-NAWAB/voice-eval-toolkit/tree/main/docs">Docs</a>
+      <a href="https://telephony-wer-bench.vercel.app">Related</a>
     </nav>
   </div>
 </header>
@@ -96,6 +97,9 @@ qsv load --transport loopback \
     <li><strong>SIP:</strong> a stub for now. It is on the roadmap.</li>
     <li><strong>Langfuse and Phoenix:</strong> through OpenTelemetry. Every call becomes a trace.</li>
   </ul>
+
+  <h2>Related</h2>
+  <p><a href="https://telephony-wer-bench.vercel.app">telephony-wer-bench</a> is a sibling project. It measures how well streaming speech-to-text hears phone audio: word error rate, time to first partial and final latency under G.711, packet loss and noise. This toolkit tests how the agent behaves in a call. That one tests how well the speech-to-text stage hears it.</p>
 
   <h2>Status</h2>
   <p>Early. It works and has tests, but it has only been run against the bundled mock agent and a local LiveKit server. Open source, MIT license. Issues and pull requests are welcome.</p>
