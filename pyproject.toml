@@ -29,6 +29,12 @@ dependencies = [
     "pyyaml>=6.0",
 ]
 
+[project.urls]
+Homepage = "https://voice-eval-toolkit.vercel.app"
+Documentation = "https://github.com/AQIB-NAWAB/voice-eval-toolkit/tree/main/docs"
+Repository = "https://github.com/AQIB-NAWAB/voice-eval-toolkit"
+Issues = "https://github.com/AQIB-NAWAB/voice-eval-toolkit/issues"
+
 [project.optional-dependencies]
 livekit = ["livekit>=1.0", "livekit-api>=1.0"]
 otel = [

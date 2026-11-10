@@ -57,6 +57,20 @@ def test_barge_in_stop_latency_tracks_the_agent_setting():
     assert s[0] - f[0] == pytest.approx(340, abs=40)
 
 
+def test_stop_jitter_spreads_stop_latencies_and_stays_seeded():
+    base = {"response_ms": [5000], "stop_latency_ms": 200, "stop_jitter_ms": 100}
+    a = [
+        call(builtin_bargein_scenario([500]), agent_options=base, seed=s).metrics.stop_latencies_ms[0]
+        for s in range(6)
+    ]
+    b = [
+        call(builtin_bargein_scenario([500]), agent_options=base, seed=s).metrics.stop_latencies_ms[0]
+        for s in range(6)
+    ]
+    assert a == b
+    assert max(a) - min(a) > 40
+
+
 def test_agent_without_barge_in_never_yields():
     r = call(builtin_bargein_scenario([500, 900]), agent_options={"barge_in": "false", "response_ms": "4000"})
     assert r.ok

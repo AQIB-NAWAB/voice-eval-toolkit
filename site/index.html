@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>voice-eval-toolkit: test how a voice agent behaves when callers interrupt</title>
+  <meta name="description" content="Open source tools that measure how fast a voice agent stops talking when a caller interrupts, and how it holds up when many callers ring at once.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <meta property="og:title" content="voice-eval-toolkit">
+  <meta property="og:description" content="Measure barge-in, turn gaps and latency of a voice agent, one call or fifty at once.">
+  <meta property="og:image" content="https://voice-eval-toolkit.vercel.app/images/bargein-timeline.png">
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="name" href="/">voice-eval-toolkit</a>
+    <nav>
+      <a href="https://github.com/AQIB-NAWAB/voice-eval-toolkit">GitHub</a>
+      <a href="https://github.com/AQIB-NAWAB/voice-eval-toolkit/tree/main/docs">Docs</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <h1>Test how a voice agent behaves when callers interrupt.</h1>
+  <p class="lead">voice-eval-toolkit places scripted test calls to your voice agent, listens to both sides of the audio, and tells you how long the agent took to stop talking, how often it cut the caller off, and how long the caller waited for an answer.</p>
+  <p class="sub">It is a Python command line tool called <code>qsv</code>. It is for people who build voice agents and want numbers instead of "it felt fine on my call".</p>
+  <p class="links">
+    <a href="https://github.com/AQIB-NAWAB/voice-eval-toolkit">View on GitHub</a>
+    <a href="#quickstart">Quickstart</a>
+  </p>
+
+  <figure>
+    <img src="images/bargein-timeline.png" alt="Two rows of audio, caller on top and agent below. The caller starts talking while the agent is speaking, and the agent goes quiet 200 milliseconds later." width="1210" height="726">
+    <figcaption>A real run of the tool. The caller cuts in while the agent is talking, and the agent goes quiet 200 ms later. This call used the mock agent that ships with the repo, not a real voice agent.</figcaption>
+  </figure>
+
+  <h2>The problem</h2>
+  <p>Voice agents often keep talking after the caller starts speaking. Some answer too slowly, and some jump in while the caller is still thinking.</p>
+  <p>These problems are hard to spot by calling your own agent a few times. They are even harder to check when many people call at once.</p>
+
+  <h2>What it measures</h2>
+  <dl>
+    <dt>Barge-in stop latency</dt>
+    <dd>Time from the caller starting to speak until the agent's audio stops.</dd>
+    <dt>False interruptions</dt>
+    <dd>Times the agent started talking before the caller had finished.</dd>
+    <dt>Turn gap</dt>
+    <dd>Time from the caller finishing a sentence until the agent starts to answer.</dd>
+    <dt>Latency p50, p95 and p99</dt>
+    <dd>The usual percentiles over every turn in a run.</dd>
+    <dt>Word error rate on phone audio</dt>
+    <dd>How well the agent's own transcript matches what the caller said, at 8 kHz. This needs an agent that publishes its transcripts.</dd>
+  </dl>
+  <p>All timings come from the recorded audio, using voice activity detection on both channels. The agent is treated as a black box, so the same scoring works for any stack.</p>
+
+  <h2 id="quickstart">Quickstart</h2>
+  <pre><code>git clone https://github.com/AQIB-NAWAB/voice-eval-toolkit
+cd voice-eval-toolkit
+python -m venv .venv &amp;&amp; source .venv/bin/activate
+pip install -e ".[dev]"
+
+# one call, interrupting the agent, against the built-in mock agent
+qsv bargein --transport loopback
+
+# twenty callers at once
+qsv load --transport loopback \
+  --scenario examples/scenarios/barge_in.yaml --callers 20</code></pre>
+  <p>Each run writes <code>report.json</code> and <code>report.md</code>. You can also set pass or fail limits, so a slow agent fails your CI build.</p>
+
+  <figure>
+    <img src="images/terminal-load.png" alt="Terminal output of a qsv load run with 20 callers, showing turn gap and barge-in stop latency percentiles." width="852" height="330">
+    <figcaption>Output of <code>qsv load</code> with 20 callers against the mock agent. The numbers describe the mock agent's settings, not a real agent.</figcaption>
+  </figure>
+
+  <h2>How it works</h2>
+  <p>You describe a call in a short YAML file: what the caller says, when it pauses, and when it interrupts. The tool starts as many simulated callers as you ask for and sends their audio to your agent. It records what comes back and scores it.</p>
+
+  <figure>
+    <img src="images/architecture.png" alt="Diagram. A scenario file feeds simulated callers, which talk through a transport to the voice agent. Both audio streams are recorded, passed through voice activity detection, turned into metrics, and written to a report or sent over OpenTelemetry." width="1210" height="572">
+    <figcaption>Scenario in, audio through a transport, metrics out.</figcaption>
+  </figure>
+
+  <figure>
+    <img src="images/latency-distribution.png" alt="Two histograms. Turn gap values run from about 600 to 1000 milliseconds. Barge-in stop latency values run from about 140 to 260 milliseconds." width="1210" height="440">
+    <figcaption>Turn gap and stop latency from 20 loopback calls. The mock agent has random jitter switched on so the charts have something to show. These are not real agent numbers.</figcaption>
+  </figure>
+
+  <h2>Works with</h2>
+  <ul>
+    <li><strong>Mock agent (loopback):</strong> runs in a second, no network, good for CI.</li>
+    <li><strong>LiveKit:</strong> each test call joins its own room. Tested against a local LiveKit dev server, not yet against LiveKit Cloud.</li>
+    <li><strong>SIP:</strong> a stub for now. It is on the roadmap.</li>
+    <li><strong>Langfuse and Phoenix:</strong> through OpenTelemetry. Every call becomes a trace.</li>
+  </ul>
+
+  <h2>Status</h2>
+  <p>Early. It works and has tests, but it has only been run against the bundled mock agent and a local LiveKit server. Open source, MIT license. Issues and pull requests are welcome.</p>
+  <p class="links">
+    <a href="https://github.com/AQIB-NAWAB/voice-eval-toolkit">GitHub</a>
+    <a href="https://github.com/AQIB-NAWAB/voice-eval-toolkit/blob/main/README.md">README</a>
+    <a href="https://github.com/AQIB-NAWAB/voice-eval-toolkit/tree/main/docs">Docs</a>
+  </p>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    Built by <a href="https://aqibnawab.vercel.app/">Aqib Nawab</a>. MIT license.
+  </div>
+</footer>
+
+</body>
+</html>

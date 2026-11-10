@@ -42,6 +42,7 @@ class LoopbackConfig:
     barge_in: bool = True
     barge_in_min_speech_ms: float = 120.0
     stop_latency_ms: float = 80.0
+    stop_jitter_ms: float = 0.0
     stt_word_error_rate: float = 0.0
     vad_threshold_db: float = -45.0
     level_db: float = -22.0
@@ -169,7 +170,12 @@ class LoopbackAgent:
             and self._stop_at is None
             and self.gate.consecutive_speech * self.frame_ms >= cfg.barge_in_min_speech_ms
         ):
-            self._stop_at = self.tick + self._ticks(cfg.stop_latency_ms)
+            stop_jitter = (
+                float(self.rng.uniform(-cfg.stop_jitter_ms, cfg.stop_jitter_ms))
+                if cfg.stop_jitter_ms
+                else 0.0
+            )
+            self._stop_at = self.tick + self._ticks(max(0.0, cfg.stop_latency_ms + stop_jitter))
 
         if self._pending_at is not None and self.tick >= self._pending_at and not self.speaking:
             self._pending_at = None

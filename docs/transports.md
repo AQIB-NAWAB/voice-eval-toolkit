@@ -23,6 +23,7 @@ The mock agent is configured with `--agent-opt key=value` (repeatable) or the `a
 | `barge_in` | true | stop when the caller speaks |
 | `barge_in_min_speech_ms` | 120 | caller speech needed to trigger a stop |
 | `stop_latency_ms` | 80 | audio that keeps playing after the stop decision |
+| `stop_jitter_ms` | 0 | seeded random plus or minus on `stop_latency_ms`, so stop latencies vary between calls |
 | `stt_word_error_rate` | 0 | simulated transcript errors |
 | `vad_threshold_db` | -45 | the mock's own VAD floor |
 

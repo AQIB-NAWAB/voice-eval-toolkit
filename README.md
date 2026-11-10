@@ -9,9 +9,21 @@ The package is called `qsv` and ships one CLI with two tools:
 
 It is built by Aqib Nawab as part of the groundwork for QuickStart AI, an open-source voice agent infrastructure project that is still in development. Nothing here claims production traffic. The numbers in this README come from the bundled mock agent and a local LiveKit dev server, and they say so.
 
+[Landing page](https://voice-eval-toolkit.vercel.app) | [Docs](docs) | [Research notes](docs/research.md)
+
+![Timeline of one loopback call. The caller interrupts the agent and the agent goes quiet 200 ms later.](docs/images/bargein-timeline.png)
+
+*One loopback call, three interruptions, zoomed in on the first. The agent stops 200 ms after the caller starts talking. This is the bundled mock agent, not a real voice agent, so the 200 ms is simply what the mock was configured to do and what the harness recovered.*
+
 ## Why another tool
 
 Pipecat and LiveKit Agents already emit good per-stage timings (TTFB, LLM time to first token, per-turn latency) and OpenTelemetry traces. Langfuse and Phoenix already give you dashboards. What those don't tell you is what happened on the line: did the agent actually go quiet when the caller spoke, and by how many milliseconds? `qsv` treats the agent as a black box, listens to both audio channels with a VAD, and measures from the audio alone, so the same scoring works for any stack. See [docs/research.md](docs/research.md) for the landscape, including the open-source projects that are closest to this one (voicebench, rtpbench, LiveKit EOT Bench) and what is different here.
+
+### How it works
+
+![Architecture: scenario YAML feeds simulated callers, which talk through a transport (loopback, LiveKit or SIP) to the voice agent. Both audio streams are recorded, run through a VAD, scored, and written to a report or exported over OpenTelemetry.](docs/images/architecture.png)
+
+*Scenario in, audio through a transport, metrics out. SIP is a stub for now.*
 
 ## Quickstart
 
@@ -40,7 +52,23 @@ report: qsv-report/bargein/report.json
         qsv-report/bargein/report.md
 ```
 
+![Terminal output of qsv bargein.](docs/images/terminal-bargein.png)
+
+*The same output as an image, from the bundled mock agent.*
+
 Those figures describe the mock agent's configured behavior (500 ms endpointing, 300 ms response delay, 120 ms of caller speech to trigger barge-in, 80 ms audio tail), which is exactly what the harness should recover. That is the point of the loopback transport: it gives the analyser a known ground truth and lets the whole toolkit run in CI.
+
+And a load run with 20 simulated callers (random jitter is switched on for the mock agent, so the numbers spread out):
+
+![Terminal output of qsv load with 20 callers.](docs/images/terminal-load.png)
+
+*Output of `qsv load`, taken from a real run against the bundled mock agent. These numbers describe the mock, not a real agent.*
+
+![Histograms of turn gap and barge-in stop latency from 20 loopback calls, with p50 and p95 marked.](docs/images/latency-distribution.png)
+
+*Turn gap and barge-in stop latency from the same 20 calls. Mock agent again.*
+
+The images in this README are regenerated from real runs with `python scripts/make_images.py` (needs `pip install matplotlib pillow`).
 
 ### Install extras
 
@@ -172,6 +200,8 @@ src/qsv/
   observability.py  OpenTelemetry export (optional)
   transports/       base, loopback, livekit_transport, sip (stub)
   cli.py            qsv bargein | load | validate
+site/               the static landing page (deployed on Vercel)
+scripts/            make_images.py regenerates docs/images
 ```
 
 ## Roadmap
